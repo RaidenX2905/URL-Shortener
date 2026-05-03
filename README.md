@@ -1,80 +1,140 @@
 # ClipLnk
 
-URL shortener built with React, Netlify Functions, and Supabase.
+Short, clean link generation with a lightweight React UI and Netlify Functions backend.
 
-Live site:
-- [https://cliplnk.netlify.app](https://cliplnk.netlify.app)
+[Live Demo](https://cliplnk.netlify.app) · [Repository](https://github.com/RaidenX2905/URL-Shortener)
+
+---
+
+## Overview
+
+ClipLnk is a full-stack URL shortener built to stay simple on the surface and practical under the hood.
+
+- Generate compact 5-character short codes
+- Redirect with `/r/<code>` routing
+- Copy links instantly from the UI
+- Track click counts during redirects
+- Deploy on Netlify with serverless functions
 
 Short link format:
-- `https://cliplnk.netlify.app/r/<code>`
 
-## Stack
+```text
+https://cliplnk.netlify.app/r/abc12
+```
 
-- Frontend: React + Vite
-- Serverless backend: Netlify Functions
-- Database: Supabase Postgres
-- Hosting: Netlify
+---
+
+## Tech Stack
+
+| Layer | Tech |
+| --- | --- |
+| Frontend | React, Vite |
+| Backend | Netlify Functions |
+| Storage | Netlify Blobs |
+| Hosting | Netlify |
+
+---
 
 ## Features
 
-- Create short links from long URLs
-- 5-character random Base62 codes
-- Redirect through `/r/<code>`
-- Click counter on redirect
-- Copy-to-clipboard output
+- Clean landing page UI
+- URL validation before create
+- Random Base62 short-code generation
+- Fast redirect handler
+- Copy-to-clipboard support
+- Serverless deployment flow
 
-## Security Notes
-
-- Raw `links` table is not publicly readable or writable
-- Link creation and resolution go through narrow Supabase RPC functions
-- No public list/recent-links endpoint
-- API responses use `Cache-Control: no-store`
+---
 
 ## Project Structure
 
 ```text
-frontend/
-  netlify/functions/
-  src/
-backend/
+.
+├─ frontend/
+│  ├─ netlify/functions/
+│  └─ src/
+├─ netlify/functions/
+├─ backend/
+├─ netlify.toml
+└─ package.json
 ```
 
-`backend/` remains for local Express development history. Production flow uses Netlify Functions in `frontend/netlify/functions/`.
+Notes:
+- `frontend/` contains the main app source.
+- `netlify/functions/` is used for live/manual Netlify deployment.
+- `backend/` exists from the earlier local Express version and is not the current production path.
+
+---
 
 ## Local Development
 
-Install:
+Install dependencies:
 
 ```bash
 npm.cmd install
 ```
 
-Run frontend + local backend:
+Run local development:
 
 ```bash
 npm.cmd run dev
 ```
 
-Frontend:
-- `http://localhost:5173`
+Default local URLs:
 
-Backend:
-- `http://localhost:4000`
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:4000`
 
-## Production Routing
+---
 
-- Create link: `POST /api/links`
+## Production Routes
+
+- Create short link: `POST /api/links`
 - Redirect: `GET /r/:code`
 
-## Deploy Config
+---
 
-Netlify config is in [netlify.toml](./netlify.toml).
+## Manual Netlify Deploy
 
-Functions:
-- [frontend/netlify/functions/links.js](./frontend/netlify/functions/links.js)
-- [frontend/netlify/functions/redirect.js](./frontend/netlify/functions/redirect.js)
+Build frontend:
 
-## Notes
+```bash
+npm.cmd run build --workspace frontend
+```
 
-- Current live Netlify site was renamed from `cliplink-shortener.netlify.app` to `cliplnk.netlify.app`
-- Old domain/path can return 404
+Prepare deploy folders:
+
+```bash
+Copy-Item -Path frontend\dist\* -Destination dist -Recurse -Force
+Copy-Item -Path frontend\netlify\functions\* -Destination netlify\functions -Recurse -Force
+```
+
+Deploy:
+
+```bash
+npx netlify-cli deploy --prod --site a730d106-36bf-478c-8996-567e73a50d2e --dir dist --functions netlify/functions --no-build --filter frontend
+```
+
+---
+
+## Security Notes
+
+- Live create/redirect path does not expose any public list endpoint
+- Redirect handling happens server-side
+- Responses use `Cache-Control: no-store`
+- Short codes are random, not sequential
+
+---
+
+## Current Status
+
+- GitHub repo is active
+- Netlify site name is `cliplnk`
+- Production URL is [https://cliplnk.netlify.app](https://cliplnk.netlify.app)
+
+---
+
+## Author
+
+Jeevan S Hegde  
+[GitHub](https://github.com/RaidenX2905)

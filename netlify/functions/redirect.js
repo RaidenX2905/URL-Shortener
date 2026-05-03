@@ -10,8 +10,11 @@ export default async (request) => {
       return new Response("Link not found", { status: 404 });
     }
 
-    const store = getStore("links");
-    const link = await store.get(shortCode, { type: "json" });
+    const store = getStore({ name: "links", consistency: "strong" });
+    const link = await store.get(shortCode, {
+      type: "json",
+      consistency: "strong"
+    });
 
     if (!link?.original_url) {
       return new Response("Link not found", { status: 404 });

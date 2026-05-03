@@ -21,11 +21,14 @@ export default async (request) => {
 };
 
 async function createShortLink(originalUrl) {
-  const store = getStore("links");
+  const store = getStore({ name: "links", consistency: "strong" });
 
   for (let attempt = 0; attempt < 8; attempt += 1) {
     const shortCode = createShortCode();
-    const existing = await store.get(shortCode, { type: "json" });
+    const existing = await store.get(shortCode, {
+      type: "json",
+      consistency: "strong"
+    });
 
     if (existing === null) {
       const link = {
