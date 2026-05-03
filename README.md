@@ -1,48 +1,32 @@
-# ClipLnk
-
-Short, clean link generation with a lightweight React UI and Netlify Functions backend.
-
-[Live Demo](https://cliplnk.netlify.app) · [Repository](https://github.com/RaidenX2905/URL-Shortener)
-
----
+# ClipLnk – Professional URL Shortening Service
 
 ## Overview
 
-ClipLnk is a full-stack URL shortener built to stay simple on the surface and practical under the hood.
+**ClipLnk** is a lightweight, production‑ready URL shortener built with a modern React frontend (Vite) and a serverless backend powered by Netlify Functions. It offers a seamless experience for creating concise, 5‑character short links that redirect instantly while tracking click statistics.
 
-- Generate compact 5-character short codes
-- Redirect with `/r/<code>` routing
-- Copy links instantly from the UI
-- Track click counts during redirects
-- Deploy on Netlify with serverless functions
-
-Short link format:
-
-```text
-https://cliplnk.netlify.app/r/abc12
-```
+[🚀 Live Demo](https://cliplnk.netlify.app) | [📂 Repository](https://github.com/RaidenX2905/URL-Shortener)
 
 ---
 
-## Tech Stack
+### Key Features
 
-| Layer | Tech |
-| --- | --- |
-| Frontend | React, Vite |
-| Backend | Netlify Functions |
-| Storage | Netlify Blobs |
-| Hosting | Netlify |
+- **Instant Short‑Link Generation** – Produce compact, 5‑character codes using a secure Base62 algorithm.
+- **Server‑Side Redirects** – Fast, reliable redirects via the `/r/<code>` endpoint.
+- **Clipboard Integration** – One‑click copy of generated short URLs.
+- **Click‑Count Analytics** – Track usage statistics for each short link.
+- **Robust Validation** – Ensure URLs are well‑formed before shortening.
+- **Seamless Deployment** – Fully compatible with Netlify's CI/CD workflow.
 
 ---
 
-## Features
+## Technology Stack
 
-- Clean landing page UI
-- URL validation before create
-- Random Base62 short-code generation
-- Fast redirect handler
-- Copy-to-clipboard support
-- Serverless deployment flow
+| Layer      | Technology |
+|------------|------------|
+| Frontend   | React, Vite |
+| Backend    | Netlify Functions |
+| Storage    | Netlify Blobs |
+| Hosting    | Netlify |
 
 ---
 
@@ -50,91 +34,77 @@ https://cliplnk.netlify.app/r/abc12
 
 ```text
 .
-├─ frontend/
-│  ├─ netlify/functions/
-│  └─ src/
-├─ netlify/functions/
-├─ backend/
-├─ netlify.toml
-└─ package.json
+├─ frontend/                # React application source
+│   ├─ netlify/functions/   # Serverless functions (deployment)
+│   └─ src/                # UI components and pages
+├─ netlify/functions/       # Additional Netlify functions (if any)
+├─ backend/                 # Legacy Express version (not used in production)
+├─ netlify.toml             # Netlify configuration file
+└─ package.json            # Workspace and dependency definitions
 ```
-
-Notes:
-- `frontend/` contains the main app source.
-- `netlify/functions/` is used for live/manual Netlify deployment.
-- `backend/` exists from the earlier local Express version and is not the current production path.
 
 ---
 
-## Local Development
+## Getting Started (Local Development)
 
-Install dependencies:
-
-```bash
-npm.cmd install
-```
-
-Run local development:
-
-```bash
-npm.cmd run dev
-```
-
-Default local URLs:
-
-- Frontend: `http://localhost:5173`
-- Backend: `http://localhost:4000`
+1. **Install Dependencies**
+   ```bash
+   npm install
+   ```
+2. **Run Development Server**
+   ```bash
+   npm run dev
+   ```
+   The application will be available at `http://localhost:5173` (frontend) and `http://localhost:4000` (backend API).
 
 ---
 
-## Production Routes
+## Production API Endpoints
 
-- Create short link: `POST /api/links`
-- Redirect: `GET /r/:code`
+- **Create Short Link** – `POST /api/links`
+- **Redirect** – `GET /r/:code`
 
 ---
 
-## Manual Netlify Deploy
-
-Build frontend:
+## Deploying to Netlify (Manual)
 
 ```bash
-npm.cmd run build --workspace frontend
-```
+# Build the frontend
+npm run build --workspace frontend
 
-Prepare deploy folders:
-
-```bash
+# Prepare the deployment directory
 Copy-Item -Path frontend\dist\* -Destination dist -Recurse -Force
 Copy-Item -Path frontend\netlify\functions\* -Destination netlify\functions -Recurse -Force
-```
 
-Deploy:
-
-```bash
-npx netlify-cli deploy --prod --site a730d106-36bf-478c-8996-567e73a50d2e --dir dist --functions netlify/functions --no-build --filter frontend
+# Deploy using Netlify CLI
+npx netlify-cli deploy \
+  --prod \
+  --site a730d106-36bf-478c-8996-567e73a50d2e \
+  --dir dist \
+  --functions netlify/functions \
+  --no-build \
+  --filter frontend
 ```
 
 ---
 
-## Security Notes
+## Security Considerations
 
-- Live create/redirect path does not expose any public list endpoint
-- Redirect handling happens server-side
-- Responses use `Cache-Control: no-store`
-- Short codes are random, not sequential
+- No public endpoint exposes the full list of stored links.
+- All redirects are processed server‑side, mitigating client‑side manipulation.
+- Responses include `Cache-Control: no-store` to prevent caching of redirect data.
+- Short codes are generated randomly, eliminating predictability.
 
 ---
 
 ## Current Status
 
-- GitHub repo is active
-- Netlify site name is `cliplnk`
-- Production URL is [https://cliplnk.netlify.app](https://cliplnk.netlify.app)
+- The repository is actively maintained.
+- Deployed site: **cliplnk** (`https://cliplnk.netlify.app`).
 
 ---
 
 ## Author
 
-Jeevan S Hegde  
-[GitHub](https://github.com/RaidenX2905)
+**Jeevan S Hegde** – [GitHub Profile](https://github.com/RaidenX2905)
+
