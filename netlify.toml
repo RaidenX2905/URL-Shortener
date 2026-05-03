@@ -1,0 +1,22 @@
+[build]
+  command = "npm run build --workspace frontend"
+  publish = "frontend/dist"
+
+[functions]
+  directory = "frontend/netlify/functions"
+
+[[redirects]]
+  from = "/api/links"
+  to = "/.netlify/functions/links"
+  status = 200
+
+[[redirects]]
+  from = "/r/*"
+  to = "/.netlify/functions/redirect?shortCode=:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

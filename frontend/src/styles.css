@@ -1,0 +1,223 @@
+:root {
+  font-family: "Segoe UI", sans-serif;
+  color: #f2efe8;
+  background:
+    radial-gradient(circle at top left, rgba(240, 148, 61, 0.25), transparent 30%),
+    radial-gradient(circle at top right, rgba(73, 164, 255, 0.18), transparent 28%),
+    linear-gradient(135deg, #111111 0%, #1c160f 48%, #0f1821 100%);
+  --panel: rgba(255, 255, 255, 0.08);
+  --panel-border: rgba(255, 255, 255, 0.14);
+  --accent: #ff9d42;
+  --accent-dark: #d96b0c;
+  --text-soft: rgba(242, 239, 232, 0.74);
+  --danger: #ff8f8f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.page-shell {
+  min-height: 100vh;
+  padding: 32px 20px 48px;
+}
+
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(360px, 440px);
+  gap: 28px;
+  align-items: center;
+  min-height: calc(100vh - 120px);
+}
+
+.hero-copy,
+.hero-card {
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  backdrop-filter: blur(18px);
+  border-radius: 28px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.24);
+}
+
+.hero-copy {
+  padding: 44px;
+}
+
+.hero-copy h1 {
+  max-width: 11ch;
+  margin: 0 0 18px;
+  font-size: clamp(3rem, 6vw, 5.8rem);
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+}
+
+.hero-text,
+.shortener-form label,
+.result-label {
+  color: var(--text-soft);
+}
+
+.hero-text {
+  max-width: 30rem;
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.7;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.hero-card {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 430px;
+}
+
+.feature-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.feature-strip span,
+.card-eyebrow {
+  color: var(--text-soft);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.feature-strip span {
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-copy {
+  margin-bottom: 22px;
+}
+
+.card-copy h2 {
+  margin: 8px 0 0;
+  max-width: 14ch;
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  line-height: 1.05;
+}
+
+.shortener-form {
+  display: grid;
+  gap: 12px;
+}
+
+.shortener-form input {
+  width: 100%;
+  padding: 18px 18px;
+  border-radius: 16px;
+  border: 1px solid transparent;
+  background: rgba(0, 0, 0, 0.25);
+  color: #fff;
+  outline: none;
+}
+
+.shortener-form input:focus {
+  border-color: rgba(255, 157, 66, 0.8);
+}
+
+.shortener-form button,
+.ghost-button {
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    opacity 180ms ease,
+    background 180ms ease;
+}
+
+.shortener-form button {
+  margin-top: 4px;
+  padding: 17px 18px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  color: #1b1208;
+  font-weight: 800;
+}
+
+.shortener-form button:hover,
+.ghost-button:hover {
+  transform: translateY(-1px);
+}
+
+.shortener-form button:disabled {
+  cursor: wait;
+  opacity: 0.8;
+}
+
+.result-card {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.result-card strong {
+  display: block;
+  margin: 4px 0 12px;
+  word-break: break-all;
+}
+
+.ghost-button {
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.error-text {
+  margin: 14px 0 0;
+  color: var(--danger);
+}
+
+@media (max-width: 860px) {
+  .hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .hero-copy,
+  .hero-card {
+    padding: 22px;
+  }
+
+  .hero-copy h1,
+  .card-copy h2 {
+    max-width: none;
+  }
+
+  .hero-card {
+    min-height: auto;
+  }
+}
