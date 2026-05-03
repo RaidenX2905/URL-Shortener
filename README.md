@@ -3,6 +3,9 @@
 ## 📌 Quick Summary
 **ClipLnk** is a high‑performance, production‑grade URL shortener. It combines a sleek **React + Vite** front‑end with a **Netlify Functions** server‑less back‑end, powered by **Node.js**, **Express**, and **Supabase** for data storage. The stack is engineered for speed, scalability, and a buttery‑smooth developer experience.
 
+## 📈 Current Status
+- Live site: **https://cliplnk.netlify.app**
+
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-🚀-brightgreen)](https://cliplnk.netlify.app)  [![Repository](https://img.shields.io/badge/Repo-💻-blue)](https://github.com/RaidenX2905/URL-Shortener)  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
@@ -15,6 +18,7 @@
 - **Robust URL validation** to prevent malformed entries.
 - **Full CI/CD** on Netlify – automated builds, previews, and production deploys.
 - **Modular monorepo** structure with separate `frontend` and `backend` workspaces.
+
 
 ---
 
@@ -134,16 +138,4 @@ npx netlify-cli deploy \
 
 ---
 
-## 📈 Current Status
-- Actively maintained and receiving updates.
-- Live site: **https://cliplnk.netlify.app**
-- Open for contributions – see the repository for the roadmap.
 
----
-
-## 👤 Author
-**Jeevan S Hegde** – [GitHub Profile](https://github.com/RaidenX2905)
-
----
-
-*Designed with premium aesthetics in mind – vibrant badges, clear sections, and a comprehensive tech‑stack showcase.*
