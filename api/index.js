@@ -1,12 +1,31 @@
 import "dotenv/config";
 import cors from "cors";
 import express from "express";
-import { kv } from "@vercel/kv";
+import { sql } from "@vercel/postgres";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// Auto-initialize table
+async function initDB() {
+  try {
+    await sql`
+      CREATE TABLE IF NOT EXISTS links (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        original_url TEXT NOT NULL,
+        short_code TEXT UNIQUE NOT NULL,
+        clicks INTEGER DEFAULT 0,
+        created_at TIMESTAMPTZ DEFAULT now()
+      );
+    `;
+    console.log("Database initialized");
+  } catch (error) {
+    console.error("Database init failed:", error);
+  }
+}
+initDB();
 
 app.get("/api/health", (_request, response) => {
   response.json({ ok: true });
@@ -14,11 +33,12 @@ app.get("/api/health", (_request, response) => {
 
 app.get("/api/links", async (_request, response) => {
   try {
-    // Note: This only shows recent links if using KV scan or similar. 
-    // KV is best for direct lookup. For a list, we just return empty or recent.
-    const keys = await kv.keys("link:*");
-    const links = await Promise.all(keys.slice(0, 10).map(key => kv.get(key)));
-    return response.json({ links: links.filter(Boolean) });
+    const { rows } = await sql`
+      SELECT * FROM links 
+      ORDER BY created_at DESC 
+      LIMIT 10;
+    `;
+    return response.json({ links: rows });
   } catch (error) {
     console.error(error);
     return response.json({ links: [] });
@@ -34,16 +54,12 @@ app.post("/api/links", async (request, response) => {
 
   try {
     const shortCode = await createUniqueShortCode();
-    const link = {
-      id: crypto.randomUUID(),
-      original_url: originalUrl,
-      short_code: shortCode,
-      clicks: 0,
-      created_at: new Date().toISOString()
-    };
-
-    await kv.set(`link:${shortCode}`, link);
-    return response.status(201).json({ link });
+    const { rows } = await sql`
+      INSERT INTO links (original_url, short_code)
+      VALUES (${originalUrl}, ${shortCode})
+      RETURNING *;
+    `;
+    return response.status(201).json({ link: rows[0] });
   } catch (error) {
     console.error(error);
     return response.status(500).json({ error: "Could not create short link" });
@@ -54,15 +70,18 @@ app.get("/r/:shortCode", async (request, response) => {
   const { shortCode } = request.params;
 
   try {
-    const link = await kv.get(`link:${shortCode}`);
+    const { rows } = await sql`
+      SELECT * FROM links WHERE short_code = ${shortCode};
+    `;
 
-    if (!link) {
+    if (rows.length === 0) {
       return response.status(404).json({ error: "Link not found" });
     }
 
-    // Increment clicks
-    link.clicks = (link.clicks || 0) + 1;
-    await kv.set(`link:${shortCode}`, link);
+    const link = rows[0];
+    await sql`
+      UPDATE links SET clicks = clicks + 1 WHERE id = ${link.id};
+    `;
 
     return response.redirect(link.original_url);
   } catch (error) {
@@ -93,8 +112,10 @@ function isValidUrl(value) {
 async function createUniqueShortCode() {
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const shortCode = createShortCode();
-    const exists = await kv.exists(`link:${shortCode}`);
-    if (!exists) {
+    const { rows } = await sql`
+      SELECT id FROM links WHERE short_code = ${shortCode};
+    `;
+    if (rows.length === 0) {
       return shortCode;
     }
   }
