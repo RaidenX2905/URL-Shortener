@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "outputDirectory": "frontend/dist",
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -8,10 +9,6 @@
     {
       "source": "/r/(.*)",
       "destination": "/api/index.js"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/frontend/dist/$1"
     }
   ]
 }
