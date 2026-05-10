@@ -1,79 +1,48 @@
-# 🚀 ClipLnk – The Ultimate URL Shortening Platform
+# URL Shortener 🚀
 
-## 📌 Quick Summary
-**ClipLnk** is a high‑performance, production‑grade URL shortener. It combines a sleek **React + Vite** front‑end with a **Vercel Serverless** back‑end, powered by **Node.js**, **Express**, and **Supabase**. Simplified, light, and lightning fast.
+A modern, light, and premium URL shortener built with **React**, **Vite**, and **Express**. 
 
-## 📈 Current Status
-- Live site: **(Deploying on Vercel)**
-
-[![Repository](https://img.shields.io/badge/Repo-💻-blue)](https://github.com/RaidenX2905/URL-Shortener)  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+### 🌐 Live Demo
+**[https://url-shortener-coral-psi.vercel.app/](https://url-shortener-coral-psi.vercel.app/)**
 
 ---
 
-## ✨ What Makes ClipLnk *Crazy Awesome*
-- **Vercel Native** – Deployment-ready with optimized serverless functions.
-- **Instant short‑links** – Generated with cryptographically‑secure codes.
-- **Supabase Powered** – Rock-solid persistence for your links.
-- **Zero-Config Deployment** – Push to GitHub and Vercel handles the rest.
-- **Clean Structure** – No redundant folders. Just `frontend` and `api`.
-
----
+## ✨ Features
+- **Instant Shortening**: Paste long URLs and get short, shareable links.
+- **Permanent Storage**: Powered by Vercel Redis (KV).
+- **Click Analytics**: Tracks how many times your links are used.
+- **Premium UI**: Clean, responsive, and modern aesthetics.
+- **Serverless Backend**: Fast, scalable, and cost-effective.
 
 ## 🛠️ Tech Stack
-| Layer | Technology |
-|-------|------------|
-| **Frontend** | React 19 + Vite 7 |
-| **Backend** | Node.js + Express (Vercel Functions) |
-| **Database** | Supabase |
-| **Hosting** | Vercel |
+- **Frontend**: React + Vite + Vanilla CSS
+- **Backend**: Express (Serverless Functions)
+- **Database**: Vercel Redis (Universal Client)
+- **Deployment**: Vercel
 
----
+## 🚀 Setup & Deployment
 
-## 📂 Project Structure
-```text
-.
-├─ api/                 # Vercel Serverless Functions (Express)
-├─ frontend/            # React app source
-│   └─ dist/           # Built frontend (production)
-├─ scripts/             # Local development tools
-├─ vercel.json          # Vercel routing & config
-├─ package.json         # Root scripts & dependencies
-└─ README.md            # You are here! 🎉
-```
-
----
-
-## 🏃‍♂️ Local Development
+### 1. Local Development
 ```bash
 # Install dependencies
 npm install
 
-# Run frontend + API server concurrently
+# Start development server
 npm run dev
 ```
-- **Frontend**: http://localhost:5173
-- **API**: http://localhost:3000 (Proxied via Vite)
+
+### 2. Vercel Deployment (One-Click)
+1. **Connect Repository**: Import this project to Vercel.
+2. **Setup Storage**: Go to **Storage** tab → **Create** → **Redis**. 
+3. **Environment Variables**:
+   - `REDIS_URL`: Automatically added by Vercel Redis.
+   - `VITE_APP_LINK_BASE_URL`: Set this to your production URL (e.g., `https://your-site.vercel.app`).
+4. **Deploy**: Vercel will automatically build and serve the project.
 
 ---
 
-## 📦 Deployment (Vercel)
-1. **Push to GitHub**: Changes are automatically picked up.
-2. **Configure Vercel**:
-   - **Framework**: Vite
-   - **Root Directory**: `./`
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `frontend/dist`
-3. **Env Vars**:
-   - `SUPABASE_URL`
-   - `SUPABASE_SERVICE_ROLE_KEY`
-   - `VITE_APP_LINK_BASE_URL`
-
----
-
-## 📊 API Endpoints
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/api/links` | Create short link. |
-| `GET`  | `/r/:code`   | Redirect to original URL. |
-
----
+## 📂 Project Structure
+- `src/`: React frontend logic and styles.
+- `api/`: Serverless functions for link management and redirection.
+- `index.html`: Frontend entry point.
+- `package.json`: Project dependencies and scripts.
