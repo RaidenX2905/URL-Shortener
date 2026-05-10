@@ -1,20 +1,22 @@
 {
-  "name": "url-shortener",
+  "name": "clp-link",
   "private": true,
-  "workspaces": [
-    "frontend"
-  ],
+  "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run dev --workspace frontend\" \"node scripts/dev-server.js\"",
-    "build": "npm run build --workspace frontend"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@vercel/postgres": "^0.10.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "@vitejs/plugin-react": "^5.0.2",
+    "vite": "^7.1.3"
   }
 }

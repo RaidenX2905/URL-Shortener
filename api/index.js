@@ -32,14 +32,15 @@ async function initDB() {
 }
 initDB();
 
-app.get("/api/health", (_request, response) => {
+app.get(["/api/health", "/health"], (_request, response) => {
   response.json({ ok: true });
 });
 
-app.get("/api/links", async (_request, response) => {
+app.get(["/api/links", "/links"], async (_request, response) => {
   try {
     const dbUrl = process.env.POSTGRES_URL || process.env.STORAGE_URL;
-    if (!dbUrl) return response.json({ links: [], error: "No DB" });
+    if (!dbUrl) return response.json({ links: [], error: "No DB connected in Vercel" });
+    
     const { rows } = await sql`SELECT * FROM links ORDER BY created_at DESC LIMIT 10`;
     return response.json({ links: rows });
   } catch (error) {
@@ -48,13 +49,13 @@ app.get("/api/links", async (_request, response) => {
   }
 });
 
-app.post("/api/links", async (request, response) => {
+app.post(["/api/links", "/links"], async (request, response) => {
   try {
     const { originalUrl } = request.body;
     if (!originalUrl || !isValidUrl(originalUrl)) return response.status(400).json({ error: "Invalid URL" });
     
     const dbUrl = process.env.POSTGRES_URL || process.env.STORAGE_URL;
-    if (!dbUrl) return response.json({ error: "No DB", link: { original_url: originalUrl, short_code: "demo" } });
+    if (!dbUrl) return response.json({ error: "No DB connected", link: { original_url: originalUrl, short_code: "demo" } });
 
     const shortCode = await createUniqueShortCode();
     const { rows } = await sql`INSERT INTO links (original_url, short_code) VALUES (${originalUrl}, ${shortCode}) RETURNING *`;
@@ -65,22 +66,22 @@ app.post("/api/links", async (request, response) => {
   }
 });
 
-app.get("/r/:shortCode", async (request, response) => {
+app.get(["/r/:shortCode", "/:shortCode"], async (request, response) => {
   const { shortCode } = request.params;
+  if (!shortCode || shortCode === "api" || shortCode === "assets") return response.status(404).end();
 
   try {
-    const { rows } = await sql`
-      SELECT * FROM links WHERE short_code = ${shortCode};
-    `;
+    const dbUrl = process.env.POSTGRES_URL || process.env.STORAGE_URL;
+    if (!dbUrl) return response.status(500).json({ error: "No DB" });
+
+    const { rows } = await sql`SELECT * FROM links WHERE short_code = ${shortCode}`;
 
     if (rows.length === 0) {
       return response.status(404).json({ error: "Link not found" });
     }
 
     const link = rows[0];
-    await sql`
-      UPDATE links SET clicks = clicks + 1 WHERE id = ${link.id};
-    `;
+    await sql`UPDATE links SET clicks = clicks + 1 WHERE id = ${link.id}`;
 
     return response.redirect(link.original_url);
   } catch (error) {
@@ -109,11 +110,12 @@ function isValidUrl(value) {
 }
 
 async function createUniqueShortCode() {
+  const dbUrl = process.env.POSTGRES_URL || process.env.STORAGE_URL;
+  if (!dbUrl) return createShortCode();
+
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const shortCode = createShortCode();
-    const { rows } = await sql`
-      SELECT id FROM links WHERE short_code = ${shortCode};
-    `;
+    const { rows } = await sql`SELECT id FROM links WHERE short_code = ${shortCode}`;
     if (rows.length === 0) {
       return shortCode;
     }
