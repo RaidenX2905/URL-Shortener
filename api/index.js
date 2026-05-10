@@ -11,8 +11,9 @@ app.use(express.json());
 // Auto-initialize table
 async function initDB() {
   try {
-    if (!process.env.POSTGRES_URL) {
-      console.warn("POSTGRES_URL missing. Database not initialized.");
+    const dbUrl = process.env.POSTGRES_URL || process.env.STORAGE_URL;
+    if (!dbUrl) {
+      console.warn("Database URL missing. Database not initialized.");
       return;
     }
     await sql`
@@ -37,7 +38,8 @@ app.get("/api/health", (_request, response) => {
 
 app.get("/api/links", async (_request, response) => {
   try {
-    if (!process.env.POSTGRES_URL) return response.json({ links: [], error: "No DB" });
+    const dbUrl = process.env.POSTGRES_URL || process.env.STORAGE_URL;
+    if (!dbUrl) return response.json({ links: [], error: "No DB" });
     const { rows } = await sql`SELECT * FROM links ORDER BY created_at DESC LIMIT 10`;
     return response.json({ links: rows });
   } catch (error) {
@@ -50,7 +52,9 @@ app.post("/api/links", async (request, response) => {
   try {
     const { originalUrl } = request.body;
     if (!originalUrl || !isValidUrl(originalUrl)) return response.status(400).json({ error: "Invalid URL" });
-    if (!process.env.POSTGRES_URL) return response.json({ error: "No DB", link: { original_url: originalUrl, short_code: "demo" } });
+    
+    const dbUrl = process.env.POSTGRES_URL || process.env.STORAGE_URL;
+    if (!dbUrl) return response.json({ error: "No DB", link: { original_url: originalUrl, short_code: "demo" } });
 
     const shortCode = await createUniqueShortCode();
     const { rows } = await sql`INSERT INTO links (original_url, short_code) VALUES (${originalUrl}, ${shortCode}) RETURNING *`;
