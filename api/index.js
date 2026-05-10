@@ -4,8 +4,6 @@ import express from "express";
 import { createClient } from "@supabase/supabase-js";
 
 const app = express();
-const port = process.env.PORT || 4000;
-const appBaseUrl = process.env.APP_BASE_URL || `http://localhost:${port}`;
 
 app.use(cors());
 app.use(express.json());
@@ -18,7 +16,7 @@ const supabase =
     ? createClient(supabaseUrl, supabaseServiceRoleKey)
     : null;
 
-app.get("/health", (_request, response) => {
+app.get("/api/health", (_request, response) => {
   response.json({
     ok: true,
     database: Boolean(supabase)
@@ -27,9 +25,7 @@ app.get("/health", (_request, response) => {
 
 app.get("/api/links", async (_request, response) => {
   if (!supabase) {
-    return response.json({
-      links: []
-    });
+    return response.json({ links: [] });
   }
 
   const { data, error } = await supabase
@@ -39,23 +35,17 @@ app.get("/api/links", async (_request, response) => {
     .limit(10);
 
   if (error) {
-    return response.status(500).json({
-      error: "Could not load links"
-    });
+    return response.status(500).json({ error: "Could not load links" });
   }
 
-  return response.json({
-    links: data
-  });
+  return response.json({ links: data });
 });
 
 app.post("/api/links", async (request, response) => {
   const { originalUrl } = request.body;
 
   if (!originalUrl || !isValidUrl(originalUrl)) {
-    return response.status(400).json({
-      error: "Enter valid URL"
-    });
+    return response.status(400).json({ error: "Enter valid URL" });
   }
 
   if (!supabase) {
@@ -83,18 +73,12 @@ app.post("/api/links", async (request, response) => {
       .single();
 
     if (error) {
-      return response.status(500).json({
-        error: "Could not create short link"
-      });
+      return response.status(500).json({ error: "Could not create short link" });
     }
 
-    return response.status(201).json({
-      link: data
-    });
+    return response.status(201).json({ link: data });
   } catch {
-    return response.status(500).json({
-      error: "Could not create short link"
-    });
+    return response.status(500).json({ error: "Could not create short link" });
   }
 });
 
@@ -114,9 +98,7 @@ app.get("/r/:shortCode", async (request, response) => {
     .single();
 
   if (error || !data) {
-    return response.status(404).json({
-      error: "Link not found"
-    });
+    return response.status(404).json({ error: "Link not found" });
   }
 
   await supabase
@@ -127,14 +109,10 @@ app.get("/r/:shortCode", async (request, response) => {
   return response.redirect(data.original_url);
 });
 
-app.listen(port, () => {
-  console.log(`API running on ${appBaseUrl}`);
-});
+export default app;
 
 function createShortCode(length = 6) {
-  const alphabet =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
+  const alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   return Array.from({ length }, () => {
     const index = Math.floor(Math.random() * alphabet.length);
     return alphabet[index];
