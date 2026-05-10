@@ -1,44 +1,28 @@
 import "dotenv/config";
 import cors from "cors";
 import express from "express";
-import { createClient } from "@supabase/supabase-js";
+import { kv } from "@vercel/kv";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-const supabase =
-  supabaseUrl && supabaseServiceRoleKey
-    ? createClient(supabaseUrl, supabaseServiceRoleKey)
-    : null;
-
 app.get("/api/health", (_request, response) => {
-  response.json({
-    ok: true,
-    database: Boolean(supabase)
-  });
+  response.json({ ok: true });
 });
 
 app.get("/api/links", async (_request, response) => {
-  if (!supabase) {
+  try {
+    // Note: This only shows recent links if using KV scan or similar. 
+    // KV is best for direct lookup. For a list, we just return empty or recent.
+    const keys = await kv.keys("link:*");
+    const links = await Promise.all(keys.slice(0, 10).map(key => kv.get(key)));
+    return response.json({ links: links.filter(Boolean) });
+  } catch (error) {
+    console.error(error);
     return response.json({ links: [] });
   }
-
-  const { data, error } = await supabase
-    .from("links")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(10);
-
-  if (error) {
-    return response.status(500).json({ error: "Could not load links" });
-  }
-
-  return response.json({ links: data });
 });
 
 app.post("/api/links", async (request, response) => {
@@ -48,65 +32,43 @@ app.post("/api/links", async (request, response) => {
     return response.status(400).json({ error: "Enter valid URL" });
   }
 
-  if (!supabase) {
-    return response.status(201).json({
-      link: {
-        id: crypto.randomUUID(),
-        original_url: originalUrl,
-        short_code: createShortCode(),
-        clicks: 0,
-        created_at: new Date().toISOString()
-      }
-    });
-  }
-
   try {
     const shortCode = await createUniqueShortCode();
+    const link = {
+      id: crypto.randomUUID(),
+      original_url: originalUrl,
+      short_code: shortCode,
+      clicks: 0,
+      created_at: new Date().toISOString()
+    };
 
-    const { data, error } = await supabase
-      .from("links")
-      .insert({
-        original_url: originalUrl,
-        short_code: shortCode
-      })
-      .select()
-      .single();
-
-    if (error) {
-      return response.status(500).json({ error: "Could not create short link" });
-    }
-
-    return response.status(201).json({ link: data });
-  } catch {
+    await kv.set(`link:${shortCode}`, link);
+    return response.status(201).json({ link });
+  } catch (error) {
+    console.error(error);
     return response.status(500).json({ error: "Could not create short link" });
   }
 });
 
 app.get("/r/:shortCode", async (request, response) => {
-  if (!supabase) {
-    return response.status(404).json({
-      error: "Link not found. Add Supabase env vars first."
-    });
-  }
-
   const { shortCode } = request.params;
 
-  const { data, error } = await supabase
-    .from("links")
-    .select("*")
-    .eq("short_code", shortCode)
-    .single();
+  try {
+    const link = await kv.get(`link:${shortCode}`);
 
-  if (error || !data) {
-    return response.status(404).json({ error: "Link not found" });
+    if (!link) {
+      return response.status(404).json({ error: "Link not found" });
+    }
+
+    // Increment clicks
+    link.clicks = (link.clicks || 0) + 1;
+    await kv.set(`link:${shortCode}`, link);
+
+    return response.redirect(link.original_url);
+  } catch (error) {
+    console.error(error);
+    return response.status(500).json({ error: "Server error" });
   }
-
-  await supabase
-    .from("links")
-    .update({ clicks: data.clicks + 1 })
-    .eq("id", data.id);
-
-  return response.redirect(data.original_url);
 });
 
 export default app;
@@ -129,22 +91,12 @@ function isValidUrl(value) {
 }
 
 async function createUniqueShortCode() {
-  if (!supabase) {
-    return createShortCode();
-  }
-
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const shortCode = createShortCode();
-    const { data } = await supabase
-      .from("links")
-      .select("id")
-      .eq("short_code", shortCode)
-      .maybeSingle();
-
-    if (!data) {
+    const exists = await kv.exists(`link:${shortCode}`);
+    if (!exists) {
       return shortCode;
     }
   }
-
   throw new Error("Could not create unique short code");
 }
