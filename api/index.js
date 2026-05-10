@@ -11,6 +11,10 @@ app.use(express.json());
 // Auto-initialize table
 async function initDB() {
   try {
+    if (!process.env.POSTGRES_URL) {
+      console.warn("POSTGRES_URL missing. Database not initialized.");
+      return;
+    }
     await sql`
       CREATE TABLE IF NOT EXISTS links (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
