@@ -39,7 +39,7 @@ export default async function handler(request, response) {
       const { originalUrl } = request.body;
       if (!originalUrl) return response.status(400).json({ error: "No URL" });
 
-      const shortCode = Math.random().toString(36).substring(2, 8);
+      const shortCode = Math.random().toString(36).substring(2, 5);
       const link = {
         id: crypto.randomUUID(),
         original_url: originalUrl,
