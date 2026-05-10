@@ -37,36 +37,27 @@ app.get("/api/health", (_request, response) => {
 
 app.get("/api/links", async (_request, response) => {
   try {
-    const { rows } = await sql`
-      SELECT * FROM links 
-      ORDER BY created_at DESC 
-      LIMIT 10;
-    `;
+    if (!process.env.POSTGRES_URL) return response.json({ links: [], error: "No DB" });
+    const { rows } = await sql`SELECT * FROM links ORDER BY created_at DESC LIMIT 10`;
     return response.json({ links: rows });
   } catch (error) {
     console.error(error);
-    return response.json({ links: [] });
+    return response.json({ links: [], error: error.message });
   }
 });
 
 app.post("/api/links", async (request, response) => {
-  const { originalUrl } = request.body;
-
-  if (!originalUrl || !isValidUrl(originalUrl)) {
-    return response.status(400).json({ error: "Enter valid URL" });
-  }
-
   try {
+    const { originalUrl } = request.body;
+    if (!originalUrl || !isValidUrl(originalUrl)) return response.status(400).json({ error: "Invalid URL" });
+    if (!process.env.POSTGRES_URL) return response.json({ error: "No DB", link: { original_url: originalUrl, short_code: "demo" } });
+
     const shortCode = await createUniqueShortCode();
-    const { rows } = await sql`
-      INSERT INTO links (original_url, short_code)
-      VALUES (${originalUrl}, ${shortCode})
-      RETURNING *;
-    `;
+    const { rows } = await sql`INSERT INTO links (original_url, short_code) VALUES (${originalUrl}, ${shortCode}) RETURNING *`;
     return response.status(201).json({ link: rows[0] });
   } catch (error) {
     console.error(error);
-    return response.status(500).json({ error: "Could not create short link" });
+    return response.status(500).json({ error: error.message });
   }
 });
 
