@@ -6,9 +6,11 @@
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev --workspace frontend\" \"node scripts/dev-server.js\"",
-    "build": "npm run build --workspace frontend"
+    "build": "npm run build --workspace frontend && npx shx cp -r frontend/dist dist"
   },
   "dependencies": {
+    "@netlify/blobs": "^10.1.0",
+    "@netlify/functions": "^4.2.4",
     "@vercel/postgres": "^0.10.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
