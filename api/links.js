@@ -1,28 +1,41 @@
-import { kv } from "@vercel/kv";
+import { createClient } from "redis";
+
+let client = null;
+
+async function getClient() {
+  if (client) return client;
+  
+  client = createClient({
+    url: process.env.REDIS_URL || process.env.KV_URL
+  });
+  
+  client.on("error", (err) => console.error("Redis Client Error", err));
+  await client.connect();
+  return client;
+}
 
 export default async function handler(request, response) {
-  // CORS Headers
+  // CORS
   response.setHeader('Access-Control-Allow-Credentials', true);
   response.setHeader('Access-Control-Allow-Origin', '*');
   response.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   response.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 
-  if (request.method === 'OPTIONS') {
-    return response.status(200).end();
-  }
+  if (request.method === 'OPTIONS') return response.status(200).end();
 
-  if (request.method === "GET") {
-    try {
-      const keys = await kv.keys("link:*");
-      const links = await Promise.all(keys.slice(0, 10).map(key => kv.get(key)));
+  try {
+    const redis = await getClient();
+
+    if (request.method === "GET") {
+      const keys = await redis.keys("link:*");
+      const links = await Promise.all(keys.slice(0, 10).map(async (key) => {
+        const val = await redis.get(key);
+        return val ? JSON.parse(val) : null;
+      }));
       return response.status(200).json({ links: links.filter(Boolean) });
-    } catch (error) {
-      return response.status(500).json({ links: [], error: error.message });
     }
-  }
 
-  if (request.method === "POST") {
-    try {
+    if (request.method === "POST") {
       const { originalUrl } = request.body;
       if (!originalUrl) return response.status(400).json({ error: "No URL" });
 
@@ -35,10 +48,11 @@ export default async function handler(request, response) {
         created_at: new Date().toISOString()
       };
 
-      await kv.set(`link:${shortCode}`, link);
+      await redis.set(`link:${shortCode}`, JSON.stringify(link));
       return response.status(201).json({ link });
-    } catch (error) {
-      return response.status(500).json({ error: error.message });
     }
+  } catch (error) {
+    console.error(error);
+    return response.status(500).json({ error: error.message });
   }
 }
